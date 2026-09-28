@@ -1,486 +1,356 @@
-<script>
-  if (TRANSPORT !== "http" && !HMR_ENABLED) fetchBuildState();
-  if (TRANSPORT !== "http" && HMR_ENABLED) {
-    import(BASE + "@vite/client")
-      .then(function (m) {
-        var hot = m.createHotContext("/__emergent_overlay__");
-        var updatePaths = [];
-        var updateError = null;
-        var captureUpdateFailure = safely(function (prefix, value) {
-          if (prefix !== "[vite]" || !updatePaths.length) return;
-          for (var i = 0; i < updatePaths.length; i++) {
-            if (typeof value === "string" && value.indexOf("Failed to reload " + updatePaths[i] + ". ") === 0) {
-              addError({
-                kind: "runtime",
-                message: updateError ? describe(updateError) : value,
-                file: shortFile(updatePaths[i]),
-                stack: (updateError && updateError.stack) || "",
-              });
-              updateError = null;
-              return;
-            }
-          }
-          updateError = value;
-        });
-        var originalConsoleError = console.error;
-        console.error = function () {
-          var result = originalConsoleError.apply(this, arguments);
-          captureUpdateFailure.apply(null, arguments);
-          return result;
-        };
-        hot.on("vite:beforeUpdate", safely(function (payload) {
-          updateError = null;
-          updatePaths = ((payload && payload.updates) || []).filter(function (u) {
-            return u.type === "js-update" && !/\.(css|less|sass|scss|styl|stylus|pcss|postcss|sss)(?:$|\?)/.test(u.acceptedPath);
-          }).map(function (u) { return u.acceptedPath; });
-          if (updatePaths.length) clearRuntimeErrors();
-        }));
-        function endUpdate() {
-          updatePaths = [];
-          updateError = null;
-        }
-        hot.on("vite:afterUpdate", endUpdate);
-        hot.on("vite:beforeFullReload", endUpdate);
-        hot.on("vite:error", safely(function (payload) {
-          addCompileError(payload && payload.err);
-        }));
-        hot.on("emergent-overlay:resolved", safely(function (d) {
-          var cb = d && d.id && pendingResolves[d.id];
-          if (cb) cb(d);
-        }));
-        hot.on("emergent-overlay:crash-replay-saved", safely(function (d) {
-          var cb = d && d.id && pendingReplays[d.id];
-          if (cb) cb(d.file || null);
-        }));
-        hot.on("vite:afterUpdate", safely(function (payload) {
-          var paths = [];
-          (((payload && payload.updates) || [])).forEach(function (u) {
-            if (u.path) paths.push(u.path);
-            if (u.acceptedPath && u.acceptedPath !== u.path) paths.push(u.acceptedPath);
-          });
-          clearCompileErrors(function (e) {
-            if (!e.moduleId) return false;
-            var id = String(e.moduleId).split("?")[0];
-            for (var i = 0; i < paths.length; i++) {
-              var pth = String(paths[i]).split("?")[0];
-              if (id === pth || (pth.charAt(0) === "/" && id.length > pth.length && id.slice(-pth.length) === pth)) return true;
-            }
-            return false;
-          });
-        }));
-        hotReady(hot);
-        fetchBuildState();
-      })
-      .catch(function () {
-        fetchBuildState();
-      });
-  }
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نجوم الديكور | Stars Decor</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 
-  var CSS =
-    ":host{all:initial}" +
-    ".backdrop{--c-card:#0d0d0d;--c-border:#333;--c-divider:#262626;--c-text:#fff;--c-text2:rgba(255,255,255,.55);--c-text3:rgba(255,255,255,.4);--c-inset:#161616;--c-inset-border:#2a2a2a;--c-msg:#f28b8b;--c-accent:#81ff89;--c-grad:linear-gradient(90deg,#fff 0%,#81ff89 100%);--c-btn-bg:#fff;--c-btn-fg:#111;--c-btn-hover:#e2e2e2;--c-ghost-bg:#1a1a1a;--c-ghost-border:#333;--c-ghost-fg:rgba(255,255,255,.7);--c-ghost-hover:#242424;--c-err-bg:rgba(217,69,69,.16);--c-err-fg:#f28b8b;--c-warn-bg:rgba(185,164,82,.18);--c-warn-fg:#d6c17a;--c-neut-bg:#242424;--c-neut-fg:rgba(255,255,255,.55);" +
-    "position:fixed;inset:0;z-index:2147483647;background:rgba(17,17,17,.88);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Brockmann,Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--c-text);overflow:auto}" +
-    ".backdrop.light{--c-card:#fff;--c-border:#e5e5e5;--c-divider:#ececec;--c-text:#111;--c-text2:rgba(0,0,0,.55);--c-text3:rgba(0,0,0,.4);--c-inset:#f6f6f6;--c-inset-border:#e5e5e5;--c-msg:#c92f2f;--c-accent:#0f8b2e;--c-grad:linear-gradient(90deg,#111 0%,#0f8b2e 100%);--c-btn-bg:#111;--c-btn-fg:#fff;--c-btn-hover:#333;--c-ghost-bg:#fff;--c-ghost-border:#d9d9d9;--c-ghost-fg:rgba(0,0,0,.65);--c-ghost-hover:#f2f2f2;--c-err-bg:rgba(217,69,69,.12);--c-err-fg:#b3261e;--c-warn-bg:rgba(122,93,0,.1);--c-warn-fg:#7a5d00;--c-neut-bg:#efefef;--c-neut-fg:rgba(0,0,0,.55);background:rgba(245,245,245,.88)}" +
-    ".card{background:var(--c-card);border:1px solid var(--c-border);border-radius:16px;box-shadow:0 18px 44px rgba(0,0,0,.24);max-width:760px;width:100%;max-height:calc(100vh - 48px);display:flex;flex-direction:column;overflow:hidden}" +
-    ".head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--c-divider)}" +
-    ".word{height:15px;width:auto;color:var(--c-text);display:block}" +
-    ".badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px;white-space:nowrap}" +
-    ".badge.err{background:var(--c-err-bg);color:var(--c-err-fg)}" +
-    ".badge.warn{background:var(--c-warn-bg);color:var(--c-warn-fg)}" +
-    ".badge.neutral{background:var(--c-neut-bg);color:var(--c-neut-fg)}" +
-    ".spacer{flex:1}" +
-    ".nav{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--c-text3)}" +
-    ".nav button{background:none;border:1px solid var(--c-ghost-border);color:var(--c-text2);border-radius:999px;width:22px;height:22px;cursor:pointer;font-size:12px;line-height:1}" +
-    ".nav button:hover{background:var(--c-ghost-hover);color:var(--c-text)}" +
-    ".x{background:none;border:none;color:var(--c-text3);font-size:15px;cursor:pointer;padding:3px 7px;border-radius:999px}" +
-    ".x:hover{color:var(--c-text);background:var(--c-ghost-hover)}" +
-    ".body{padding:18px;overflow:auto}" +
-    ".headline{font-size:17px;font-weight:600;letter-spacing:-.01em;background:var(--c-grad);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content;margin:0 0 10px}" +
-    ".msg{font-family:'Geist Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.55;color:var(--c-msg);white-space:pre-wrap;word-break:break-word;margin:0 0 12px}" +
-    ".meta{font-family:'Geist Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:var(--c-accent);margin:0 0 12px;word-break:break-all}" +
-    ".meta .plugin{color:var(--c-text3)}" +
-    "pre.frame{background:var(--c-inset);border:1px solid var(--c-inset-border);border-radius:10px;padding:12px 14px;font-family:'Geist Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.55;color:var(--c-text2);overflow:auto;max-height:240px;margin:0 0 12px;white-space:pre}" +
-    "details{margin:0 0 4px}" +
-    "summary{cursor:pointer;font-size:12px;color:var(--c-text3);user-select:none}" +
-    "summary:hover{color:var(--c-text)}" +
-    "pre.stack{background:var(--c-inset);border:1px solid var(--c-inset-border);border-radius:10px;padding:12px 14px;font-family:'Geist Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px;line-height:1.55;color:var(--c-text3);overflow:auto;max-height:200px;margin:8px 0 0;white-space:pre}" +
-    ".foot{display:flex;align-items:center;gap:12px;padding:13px 18px;border-top:1px solid var(--c-divider)}" +
-    ".hint{font-size:12px;color:var(--c-text3);flex:1;line-height:1.5}" +
-    ".btn{border-radius:999px;font-size:12.5px;font-weight:500;padding:7px 16px;cursor:pointer;white-space:nowrap}" +
-    ".btn.primary{background:var(--c-btn-bg);border:1px solid var(--c-btn-bg);color:var(--c-btn-fg)}" +
-    ".btn.primary:hover{background:var(--c-btn-hover);border-color:var(--c-btn-hover)}" +
-    ".btn.ghost{background:var(--c-ghost-bg);border:1px solid var(--c-ghost-border);color:var(--c-ghost-fg)}" +
-    ".btn.ghost:hover{background:var(--c-ghost-hover)}";
-
-  function bgLuminance(color) {
-    try {
-      var canvas = document.createElement("canvas");
-      canvas.width = canvas.height = 1;
-      var ctx = canvas.getContext("2d");
-      ctx.fillStyle = color;
-      ctx.fillRect(0, 0, 1, 1);
-      var d = ctx.getImageData(0, 0, 1, 1).data;
-      if (d[3] < 20) return null;
-      return 0.299 * d[0] + 0.587 * d[1] + 0.114 * d[2];
-    } catch (e) {
-      return null;
+  <style>
+    * {
+      font-family: 'Tajawal', sans-serif;
     }
-  }
-  function isDark() {
-    var cl = document.documentElement.classList;
-    if (cl.contains("dark")) return true;
-    if (cl.contains("light")) return false;
-    try {
-      var el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-      while (el && el !== document.documentElement) {
-        var lum = bgLuminance(getComputedStyle(el).backgroundColor);
-        if (lum != null) return lum < 128;
-        el = el.parentElement;
-      }
-      var els = [document.body, document.documentElement];
-      for (var i = 0; i < els.length; i++) {
-        if (!els[i]) continue;
-        var lum2 = bgLuminance(getComputedStyle(els[i]).backgroundColor);
-        if (lum2 != null) return lum2 < 128;
-      }
-    } catch (e) {
-      /* fall through */
+    .smooth-scroll {
+      scroll-behavior: smooth;
     }
-    return false;
-  }
-
-  var WORDMARK =
-    '<svg class="word" viewBox="0 0 112 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M63.1855 18.5146C63.6416 20.2898 65.2526 21.6022 67.1699 21.6025C69.0876 21.6025 70.6992 20.29 71.1553 18.5146H73.6016C73.1083 21.6232 70.4173 23.9999 67.1699 24C63.9227 23.9997 61.2306 21.6231 60.7373 18.5146H63.1855ZM60.6572 17.5615C60.6569 17.5366 60.6553 17.5114 60.6553 17.4863C60.6553 17.4616 60.6569 17.4367 60.6572 17.4121V17.5615ZM59.9707 6.17188L55.1709 8.57129V17.1445H52.7715V4.11719H55.1709V6.17188L59.9707 3.77148V6.17188ZM93.9121 6.17188C94.5323 5.18417 95.7329 4.7998 97.3408 4.7998C99.9593 4.79982 101.797 7.09506 101.797 9.64453V17.1436H99.3682V10.1963C99.3682 8.35869 98.2163 7.2002 96.6543 7.2002C95.0694 7.20025 93.9121 8.45061 93.9121 10.1963V17.1436H91.5117V4.7998H93.9121V6.17188ZM19.1709 6.17188C19.8566 5.1434 21.1585 4.79982 22.5996 4.7998C24.0407 4.7998 25.3426 5.48614 26.0283 6.51465C26.714 5.48614 27.7427 4.7998 29.7998 4.7998C32.7138 4.79994 34.9423 6.6857 34.9424 9.25684V17.1426H32.542V9.94238C32.5419 8.1529 31.3569 7.02848 29.7998 7.02832C28.196 7.02832 27.0567 8.24574 27.0566 9.94238V17.1426H24.6572V9.94238C24.6571 8.15278 23.3227 7.02832 21.7422 7.02832C20.1386 7.02851 19.1709 8.15009 19.1709 9.84668V17.1426H16.7715V4.7998H19.1709V6.17188ZM50.708 9.99512C50.8186 12.6349 49.3889 15.215 46.8623 16.4473C44.3358 17.6793 41.4232 17.2171 39.4111 15.5049L41.9023 14.29C43.0925 14.8701 44.5282 14.9162 45.8105 14.291C47.0928 13.6656 47.941 12.5059 48.2168 11.2109L50.708 9.99512ZM73.6836 10.5908C73.6837 10.6035 73.6846 10.6162 73.6846 10.6289C73.6846 10.6413 73.6837 10.6537 73.6836 10.666V10.9717H73.6748C73.4965 14.4098 70.6525 17.1426 67.1699 17.1426C63.5725 17.1423 60.6562 14.2263 60.6562 10.6289C60.6564 7.03165 63.5726 4.11549 67.1699 4.11523C68.7303 4.11523 70.1623 4.66426 71.2842 5.5791V3.42969H73.6836V10.5908ZM89.4502 9.99512C89.5608 12.6348 88.1309 15.2149 85.6045 16.4473C83.0779 17.6795 80.1645 17.2172 78.1523 15.5049L80.6436 14.29C81.8337 14.8701 83.2695 14.9162 84.5518 14.291C85.834 13.6656 86.6822 12.5059 86.958 11.2109L89.4502 9.99512ZM107.279 3.42773H110.021V5.82812H107.279V14.7422H111.739V17.1426L104.882 17.1416H104.88V5.82812H103.165V3.42773H104.88V0H107.279V3.42773ZM14.708 9.99316C14.8186 12.6329 13.3889 15.213 10.8623 16.4453C8.33582 17.6773 5.42318 17.2151 3.41113 15.5029L5.90234 14.2881C7.09265 14.8682 8.52816 14.9135 9.81055 14.2881C11.093 13.6626 11.9411 12.5031 12.2168 11.208L14.708 9.99316ZM67.1699 6.51367C64.8979 6.51378 63.0558 8.35502 63.0557 10.627C63.0557 12.899 64.8978 14.7411 67.1699 14.7412C69.4421 14.7412 71.2842 12.8991 71.2842 10.627C71.284 8.35496 69.442 6.51367 67.1699 6.51367ZM40.8525 4.12402C44.2554 2.46459 48.3598 3.8776 50.0195 7.28027C50.1209 7.48808 50.2104 7.69881 50.2891 7.91113L38.0273 13.8926C37.9084 13.6998 37.7977 13.4989 37.6963 13.291C36.0366 9.88819 37.4496 5.78369 40.8525 4.12402ZM79.5938 4.12402C82.9966 2.46455 87.101 3.8776 88.7607 7.28027C88.8621 7.48807 88.9516 7.69882 89.0303 7.91113L76.7686 13.8926C76.6496 13.6998 76.5389 13.4989 76.4375 13.291C74.7778 9.88819 76.1908 5.78369 79.5938 4.12402ZM4.85254 4.12207C8.25543 2.46258 12.3598 3.87557 14.0195 7.27832C14.1209 7.48616 14.2104 7.69683 14.2891 7.90918L2.02734 13.8896C1.90847 13.697 1.79765 13.4968 1.69629 13.2891C0.0365657 9.88623 1.4496 5.78174 4.85254 4.12207ZM46.8047 6.94141C45.4952 5.7885 43.5704 5.46869 41.9043 6.28125C40.2383 7.0938 39.3059 8.80725 39.4082 10.5488L46.8047 6.94141ZM85.5459 6.94141C84.2364 5.7885 82.3116 5.46869 80.6455 6.28125C78.9796 7.09382 78.0471 8.80727 78.1494 10.5488L85.5459 6.94141ZM10.8047 6.93945C9.49529 5.78661 7.57029 5.46593 5.9043 6.27832C4.23824 7.09088 3.30586 8.80523 3.4082 10.5469L10.8047 6.93945Z"/></svg>';
-  function el(tag, cls, text) {
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
-  }
-  function buildUi() {
-    var host = document.createElement("div");
-    host.setAttribute("data-emergent-overlay-host", "");
-    var shadow = host.attachShadow({ mode: "open" });
-    var style = document.createElement("style");
-    style.textContent = CSS;
-    shadow.appendChild(style);
-
-    var backdrop = el("div", "backdrop");
-    var card = el("div", "card");
-    var head = el("div", "head");
-    var markWrap = document.createElement("span");
-    markWrap.innerHTML = WORDMARK;
-    head.appendChild(markWrap.firstChild);
-    var badge = el("span", "badge", "");
-    head.appendChild(badge);
-    head.appendChild(el("span", "spacer"));
-    var nav = el("span", "nav");
-    var prev = el("button", null, "‹");
-    var pos = el("span", null, "");
-    var next = el("button", null, "›");
-    nav.appendChild(prev);
-    nav.appendChild(pos);
-    nav.appendChild(next);
-    head.appendChild(nav);
-    var x = el("button", "x", "✕");
-    head.appendChild(x);
-    card.appendChild(head);
-
-    var body = el("div", "body");
-    var headline = el("p", "headline", "");
-    var msg = el("p", "msg", "");
-    var meta = el("p", "meta", "");
-    var frame = el("pre", "frame");
-    var det = document.createElement("details");
-    var sum = el("summary", null, "Stack trace");
-    var stack = el("pre", "stack");
-    det.appendChild(sum);
-    det.appendChild(stack);
-    body.appendChild(headline);
-    body.appendChild(msg);
-    body.appendChild(meta);
-    body.appendChild(frame);
-    body.appendChild(det);
-    card.appendChild(body);
-
-    var foot = el("div", "foot");
-    var hint = el(
-      "span",
-      "hint",
-      "This error was captured by Emergent. Full details also remain in the browser console."
-    );
-    var copy = el("button", "btn ghost", "Copy details");
-    var reload = el("button", "btn primary", "Reload app");
-    foot.appendChild(hint);
-    foot.appendChild(copy);
-    foot.appendChild(reload);
-    card.appendChild(foot);
-
-    backdrop.appendChild(card);
-    shadow.appendChild(backdrop);
-
-    prev.addEventListener("click", function () {
-      current = (current - 1 + errors.length) % errors.length;
-      render();
-    });
-    next.addEventListener("click", function () {
-      current = (current + 1) % errors.length;
-      render();
-    });
-    x.addEventListener("click", function () {
-      dismissed = true;
-      render();
-    });
-    reload.addEventListener("click", function () {
-      location.reload();
-    });
-    copy.addEventListener("click", function () {
-      var text = errors.map(report).join("\n\n---\n\n");
-      try {
-        navigator.clipboard.writeText(text).then(
-          function () {
-            copy.textContent = "Copied ✓";
-            setTimeout(function () {
-              copy.textContent = "Copy details";
-            }, 1500);
-          },
-          function () {
-            /* permission denied */
-          }
-        );
-      } catch (e) {
-        /* clipboard unavailable */
-      }
-    });
-    window.addEventListener("keydown", function (ev) {
-      if (ev.key === "Escape" && !dismissed && errors.length) {
-        dismissed = true;
-        render();
-      }
-    });
-
-    return {
-      host: host,
-      backdrop: backdrop,
-      badge: badge,
-      nav: nav,
-      pos: pos,
-      headline: headline,
-      msg: msg,
-      meta: meta,
-      frame: frame,
-      det: det,
-      stack: stack,
-    };
-  }
-  function report(e) {
-    var k = KINDS[e.kind] || KINDS.runtime;
-    return (
-      "[Emergent preview error] " +
-      k.badge +
-      (e.count > 1 ? " (seen " + e.count + "×)" : "") +
-      "\nMessage: " +
-      (e.fullMessage || e.message) +
-      (e.file ? "\nFile: " + e.file : "") +
-      (e.plugin ? "\nPlugin: " + e.plugin : "") +
-      (e.replayFile
-        ? "\nSession report: " +
-          String(e.replayFile).replace(/\.json$/, ".md") +
-          " in the workspace (digest; raw events in the matching .json)"
-        : "") +
-      (e.frame ? "\n\n" + e.frame : "") +
-      (e.stack ? "\n\nStack:\n" + e.stack : "")
-    );
-  }
-  function render() {
-    window.__EMERGENT_OVERLAY_STATE__ = {
-      visible: !dismissed && errors.length > 0,
-      errors: errors.map(function (e) {
-        return { kind: e.kind, message: e.message, file: e.file, count: e.count };
-      }),
-      get splash() {
-        return splashVisible();
-      },
-    };
-    if (!document.body) {
-      document.addEventListener("DOMContentLoaded", render);
-      return;
+    .bg-gold-gradient {
+      background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%);
     }
-    if (!ui) ui = buildUi();
-    if (!ui.host.isConnected) document.body.appendChild(ui.host);
-
-    if (dismissed || !errors.length) {
-      ui.host.style.display = "none";
-      return;
+    .text-gold {
+      background: linear-gradient(135deg, #BF953F 0%, #B38728 50%, #AA771C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
-    ui.host.style.display = "none";
-    var dark = isDark();
-    ui.host.style.display = "";
-    ui.backdrop.className = "backdrop" + (dark ? "" : " light");
-
-    var e = errors[current];
-    var k = KINDS[e.kind] || KINDS.runtime;
-    ui.badge.className = "badge " + (k.tone || "neutral");
-    ui.badge.textContent = k.badge + (e.count > 1 ? " · " + e.count + "×" : "");
-    ui.headline.textContent = k.headline;
-    ui.msg.textContent = e.message;
-
-    var metaText = e.file || "";
-    ui.meta.textContent = metaText;
-    if (e.plugin) {
-      var pl = el("span", "plugin", (metaText ? "  ·  " : "") + "plugin: " + e.plugin);
-      ui.meta.appendChild(pl);
-    }
-    ui.meta.style.display = metaText || e.plugin ? "" : "none";
-
-    ui.frame.textContent = e.frame || "";
-    ui.frame.style.display = e.frame ? "" : "none";
-
-    ui.stack.textContent = e.stack || "";
-    ui.det.style.display = e.stack ? "" : "none";
-
-    ui.nav.style.display = errors.length > 1 ? "" : "none";
-    ui.pos.textContent = current + 1 + " / " + errors.length;
-  }
-})();
-</script>
-
-<script defer src="/static/js/bundle.js"></script>
-<script defer src="/__emergent_overlay__/recorder.js" data-emergent-rrweb="1"></script>
-<script>
-  if(window.self!==window.top){
-    var s=document.createElement("script");s.src="/visual-edit-overlay.js";document.head.appendChild(s);
-    window.tailwind=window.tailwind||{};tailwind.config={corePlugins:{preflight:false}};var t=document.createElement("script");t.src="https://cdn.tailwindcss.com";document.head.appendChild(t);
-  }
-</script>
+  </style>
 </head>
-<body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+<body class="bg-gray-50 text-gray-800 smooth-scroll">
 
-    <!-- كود تبديل الرقم + رابط الواتساب الجاري تشغيله دائمًا -->
-    <script>
-      (function() {
-        var oldNumberText = "+966 50 363 9175";
-        var newNumberText = "+966 50 646 6510";
-        var oldPhoneClean = "966503639175";
-        var newPhoneClean = "966506466510";
+  <!-- Header / Navigation -->
+  <header class="fixed top-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md text-white z-50 border-b border-amber-500/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-slate-900 font-bold text-xl">
+          <i data-lucide="sparkles"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide text-amber-400">نجوم الديكور</h1>
+          <p class="text-xs text-gray-400">Stars Decor</p>
+        </div>
+      </div>
+      
+      <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+        <a href="#hero" class="hover:text-amber-400 transition-colors">الرئيسية</a>
+        <a href="#services" class="hover:text-amber-400 transition-colors">خدماتنا</a>
+        <a href="#gallery" class="hover:text-amber-400 transition-colors">معرض الأعمال</a>
+        <a href="#why-us" class="hover:text-amber-400 transition-colors">لماذا نحن</a>
+        <a href="#contact" class="hover:text-amber-400 transition-colors">تواصل معنا</a>
+      </nav>
 
-        function updatePhoneAndWhatsApp() {
-          var links = document.querySelectorAll('a[href*="wa.me"], a[href*="api.whatsapp.com"], a[href*="tel:"]');
-          links.forEach(function(link) {
-            if (link.href.includes(oldPhoneClean)) {
-              link.href = link.href.replace(new RegExp(oldPhoneClean, 'g'), newPhoneClean);
-            }
-          });
+      <div class="flex items-center gap-3">
+        <a href="tel:+966506466510" class="hidden sm:flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-900 px-4 py-2 rounded-lg font-bold transition-all shadow-lg shadow-amber-500/20">
+          <i data-lucide="phone"></i>
+          <span>اتصل الآن</span>
+        </a>
+        <a href="https://wa.me/966506466510" target="_blank" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold transition-all shadow-lg shadow-emerald-600/20">
+          <i class="fab fa-whatsapp text-lg"></i>
+          <span class="hidden sm:inline">واتساب</span>
+        </a>
+      </div>
+    </div>
+  </header>
 
-          var walker = document.createTreeWalker(
-            document.body,
-            NodeFilter.SHOW_TEXT,
-            null,
-            false
-          );
+  <!-- Hero Section -->
+  <section id="hero" class="relative pt-32 pb-20 md:pt-40 md:pb-28 bg-slate-900 text-white overflow-hidden">
+    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:16px_16px]"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="text-center max-w-3xl mx-auto">
+        <span class="inline-block bg-amber-500/10 text-amber-400 border border-amber-500/30 px-4 py-1.5 rounded-full text-sm font-semibold mb-6">
+          ✨ لمسات فنية تحول مساحتك إلى تحفة معمارية
+        </span>
+        <h1 class="text-4xl md:text-6xl font-black mb-6 leading-tight">
+          نصنع الإبداع في عالم <span class="text-amber-400">الديكور والتشطيبات</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-300 mb-8 leading-relaxed">
+          نقدم أحدث تصاميم الديكور الداخلي والفرعوني والمودرن، تنفيذ أعمال الجبس بورد، الدهانات الحديثة، ورق الجدران، والإنارة الديكورية بأعلى معايير الجودة ورؤية عصرية تتناسب مع ذوقك.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="https://wa.me/966506466510" target="_blank" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all shadow-xl shadow-emerald-600/30">
+            <i class="fab fa-whatsapp text-2xl"></i>
+            <span>طلب استشارة مجانية عبر الواتساب</span>
+          </a>
+          <a href="tel:+966506466510" class="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all">
+            <i data-lucide="phone-call" class="text-amber-400"></i>
+            <span>+966 50 646 6510</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-          var node;
-          while (node = walker.nextNode()) {
-            if (node.nodeValue && node.nodeValue.includes(oldNumberText)) {
-              node.nodeValue = node.nodeValue.replace(new RegExp(oldNumberText.replace(/\+/g, '\\+'), 'g'), newNumberText);
-            }
-            if (node.nodeValue && node.nodeValue.includes("+966503639175")) {
-              node.nodeValue = node.nodeValue.replace(/\+966503639175/g, "+966506466510");
-            }
+  <!-- Features Banner -->
+  <section class="bg-amber-500 text-slate-900 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="flex items-center justify-center gap-3">
+          <i data-lucide="award" class="w-8 h-8"></i>
+          <span class="font-bold text-lg">جودة عالية وضمان</span>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+          <i data-lucide="clock" class="w-8 h-8"></i>
+          <span class="font-bold text-lg">سرعة ودقة للتسليم</span>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+          <i data-lucide="users" class="w-8 h-8"></i>
+          <span class="font-bold text-lg">كادر فني محترف</span>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+          <i data-lucide="dollar-sign" class="w-8 h-8"></i>
+          <span class="font-bold text-lg">أسعار منافسة</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="py-20 bg-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">خدماتنا المتميزة</h2>
+        <div class="w-20 h-1 bg-amber-500 mx-auto rounded-full mb-4"></div>
+        <p class="text-gray-600">نغطي كافة مجالات الديكور والتعديل الداخلي بأحدث التقنيات والأساليب العالمية</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Service 1 -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+              <i data-lucide="layers" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">أعمال الجبس بورد والأقواس</h3>
+            <p class="text-gray-600 leading-relaxed mb-6">تصميم وتنفيذ أحدث أسقف الجبس بورد الحديثة، الشاشات الجدارية، الأقواس الإسمنتية، والإضاءات المخفية المودرن.</p>
+          </div>
+          <a href="https://wa.me/966506466510?text=استفسار%20عن%20خدمات%20الجبس%20بورد" target="_blank" class="text-amber-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+            <span>استفسر عن هذه الخدمة</span>
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Service 2 -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+              <i data-lucide="paint-bucket" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">الدهانات والطلاء الحديث</h3>
+            <p class="text-gray-600 leading-relaxed mb-6">تنفيذ جميع أنواع الدهانات الداخلية والخارجية، الدهانات الديكورية، الشامواه، الترخيم، والجزيرة الجرافيت بأجود المواد.</p>
+          </div>
+          <a href="https://wa.me/966506466510?text=استفسار%20عن%20خدمات%20الدهانات" target="_blank" class="text-amber-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+            <span>استفسر عن هذه الخدمة</span>
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Service 3 -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+              <i data-lucide="box" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">بديل الخشب وبديل الرخام</h3>
+            <p class="text-gray-600 leading-relaxed mb-6">تركيب ألواح بديل الرخام وبديل الخشب للصالونات والمداخل وخلفيات التلفزيون لإعطاء مظهر فخم ومقاوم للرطوبة.</p>
+          </div>
+          <a href="https://wa.me/966506466510?text=استفسار%20عن%20بديل%20الرخام%20والخشب" target="_blank" class="text-amber-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+            <span>استفسر عن هذه الخدمة</span>
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Service 4 -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+              <i data-lucide="sparkles" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">الفوم والبراقع والمناظر ثلاثية الأبعاد</h3>
+            <p class="text-gray-600 leading-relaxed mb-6">تركيب نعلات وإطارات الفوم الديكورية، ورق الجدران الكلاسيكي والمودرن، والبوستر ثلاثي الأبعاد بأعلى دقة.</p>
+          </div>
+          <a href="https://wa.me/966506466510?text=استفسار%20عن%20الفوم%20ورق%20الجدران" target="_blank" class="text-amber-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+            <span>استفسر عن هذه الخدمة</span>
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Service 5 -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+              <i data-lucide="home" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">التشطيبات وتنسيق الحدائق</h3>
+            <p class="text-gray-600 leading-relaxed mb-6">تشطيب فلل ومحلات تجارية وشقق بالكامل مفتاح، بالإضافة للباركيه والديكورات الخارجية والشاشات الذكية.</p>
+          </div>
+          <a href="https://wa.me/966506466510?text=استفسار%20عن%20التشطيبات%20الكاملة" target="_blank" class="text-amber-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+            <span>استفسر عن هذه الخدمة</span>
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Service 6 -->
+        <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center mb-6">
+              <i data-lucide="lightbulb" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">الإنارة الديكورية والسمارت</h3>
+            <p class="text-gray-600 leading-relaxed mb-6">توزيع وتنسيق الإضاءة الحديثة، البروفايل ليد، السبوتلايت، والإضاءات الذكية التي تبرز جمال التصميم.</p>
+          </div>
+          <a href="https://wa.me/966506466510?text=استفسار%20عن%20الإنارة%20والبروفايل%20ليد" target="_blank" class="text-amber-600 font-bold flex items-center gap-2 hover:gap-3 transition-all">
+            <span>استفسر عن هذه الخدمة</span>
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section id="gallery" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">نماذج من أعمالنا</h2>
+        <div class="w-20 h-1 bg-amber-500 mx-auto rounded-full mb-4"></div>
+        <p class="text-gray-600">استعرض بعض ابتكاراتنا وتنفيذنا في مختلف المشاريع</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg h-72">
+          <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=800" alt="ديكور صالة مودرن" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div>
+              <h4 class="text-white font-bold text-xl mb-1">ديكورات صالات مودرن</h4>
+              <p class="text-amber-400 text-sm">جبس بورد وبديل رخام</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg h-72">
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800" alt="ديكور شاشات" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div>
+              <h4 class="text-white font-bold text-xl mb-1">خلفيات شاشات تلفزيون</h4>
+              <p class="text-amber-400 text-sm">دمج بديل الخشب مع الإضاءة</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative group overflow-hidden rounded-2xl shadow-lg h-72">
+          <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=800" alt="دهانات حديثة" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity flex items-end p-6">
+            <div>
+              <h4 class="text-white font-bold text-xl mb-1">غرف نوم كلاسيك ومودرن</h4>
+              <p class="text-amber-400 text-sm">دهانات وفوم ديكوري</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact & Call To Action -->
+  <section id="contact" class="py-20 bg-slate-900 text-white relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <h2 class="text-3xl md:text-5xl font-extrabold mb-6">جاهز لتحويل منزلك إلى تحفة فنية؟</h2>
+      <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-10">تواصل معنا اليوم للرد على جميع استفساراتك والحصول على معاينة واستشارة مجانية!</p>
+      
+      <div class="inline-flex flex-col sm:flex-row gap-6 justify-center items-center bg-slate-800/80 border border-slate-700 p-8 rounded-3xl backdrop-blur-sm">
+        <div class="text-right sm:border-l sm:border-slate-700 sm:pl-8">
+          <span class="text-gray-400 text-sm block mb-1">اتصال مباشر</span>
+          <a href="tel:+966506466510" class="text-2xl font-bold text-amber-400 dir-ltr inline-block">
+            +966 50 646 6510
+          </a>
+        </div>
+        <div>
+          <a href="https://wa.me/966506466510" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 transition-all shadow-lg shadow-emerald-600/30">
+            <i class="fab fa-whatsapp text-2xl"></i>
+            <span>مراسلة عبر الواتساب</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 text-gray-400 py-8 border-t border-slate-800 text-center">
+    <div class="max-w-7xl mx-auto px-4">
+      <p class="text-sm">جميع الحقوق محفوظة © 2026 نجوم الديكور | Stars Decor</p>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Floating Button -->
+  <a href="https://wa.me/966506466510" target="_blank" class="fixed bottom-6 left-6 bg-emerald-500 hover:bg-emerald-600 text-white p-4 rounded-full shadow-2xl z-50 flex items-center justify-center transition-transform hover:scale-110">
+    <i class="fab fa-whatsapp text-3xl"></i>
+  </a>
+
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Auto Script for Phone Numbers
+    (function() {
+      var oldNumberText = "+966 50 363 9175";
+      var newNumberText = "+966 50 646 6510";
+      var oldPhoneClean = "966503639175";
+      var newPhoneClean = "966506466510";
+
+      function updatePhoneAndWhatsApp() {
+        var links = document.querySelectorAll('a[href*="wa.me"], a[href*="api.whatsapp.com"], a[href*="tel:"]');
+        links.forEach(function(link) {
+          if (link.href.includes(oldPhoneClean)) {
+            link.href = link.href.replace(new RegExp(oldPhoneClean, 'g'), newPhoneClean);
+          }
+        });
+
+        var walker = document.createTreeWalker(
+          document.body,
+          NodeFilter.SHOW_TEXT,
+          null,
+          false
+        );
+
+        var node;
+        while (node = walker.nextNode()) {
+          if (node.nodeValue && node.nodeValue.includes(oldNumberText)) {
+            node.nodeValue = node.nodeValue.replace(new RegExp(oldNumberText.replace(/\+/g, '\\+'), 'g'), newNumberText);
+          }
+          if (node.nodeValue && node.nodeValue.includes("+966503639175")) {
+            node.nodeValue = node.nodeValue.replace(/\+966503639175/g, "+966506466510");
           }
         }
+      }
 
-        window.addEventListener('DOMContentLoaded', updatePhoneAndWhatsApp);
-        var observer = new MutationObserver(function() {
-          updatePhoneAndWhatsApp();
-        });
-        observer.observe(document.documentElement, {
-          childList: true,
-          subtree: true
-        });
-      })();
-    </script>
-
-    <!-- PostHog Analytics -->
-    <script>
-        !(function (t, e) {
-            var o, n, p, r;
-            e.__SV ||
-                ((window.posthog = e),
-                (e._i = []),
-                (e.init = function (i, s, a) {
-                    function g(t, e) {
-                        var o = e.split(".");
-                        2 == o.length && ((t = t[o[0]]), (e = o[1])),
-                            (t[e] = function () {
-                                t.push(
-                                    [e].concat(
-                                        Array.prototype.slice.call(
-                                            arguments,
-                                            0,
-                                        ),
-                                    ),
-                                );
-                            });
-                    }
-                    ((p = t.createElement("script")).type =
-                        "text/javascript"),
-                        (p.crossOrigin = "anonymous"),
-                        (p.async = !0),
-                        (p.src =
-                            s.api_host.replace(
-                                ".i.posthog.com",
-                                "-assets.i.posthog.com",
-                            ) + "/static/array.js"),
-                        (r =
-                            t.getElementsByTagName(
-                                "script",
-                            )[0]).parentNode.insertBefore(p, r);
-                    var u = e;
-                    for (
-                        void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
-                            u.people = u.people || [],
-                            u.toString = function (t) {
-                                var e = "posthog";
-                                return (
-                                    "posthog" !== e &&
-                                    (t = e + "_" + t),
-                                    t || (e = e + " (stub)"),
-                                    e
-                                );
-                            },
-                            u.people.toString = function () {
-                                var t = "posthog";
-                                return (
-                                    "posthog" !== t &&
-                                    (t += " (stub)"),
-                                    t
-                                );
-                            },
-                            o =
-                                "init me ws ys ps bs capture je Di ks register register_once remove_event_selector remove_external scripts getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSessionId set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property setSessionProperty Es $s createPersonProfile Is opt_in_capturing opt_out_capturing has_opted_in_capturing Ss debug xs getPageViewId captureTraceFeedback captureTraceMetric".split(
-                                    " ",
-                                ),
-                            n = 0;
-                        n < o.length;
-                        n++
-                    )
-                        g(u, o[n]);
-                    e._i.push([i, s, a]);
-                }),
-                (e.__SV = 1));
-        })(document, window.posthog || []);
-        posthog.init("phc_DbsPb39SRc8z3EiQ6Dhj6ikv4H4rTKcht9d4sZSesceP", {
-            api_host: "https://ap.emergent.sh",
-            person_profiles: "identified_only",
-            session_recording: {
-                recordCrossOriginIframes: true,
-                capturePerformance: false,
-            },
-        });
-    </script>
-    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"7f7b0fd8732c4326aae4b9d58d5c514a","spa":2}' crossorigin="anonymous"></script>
+      window.addEventListener('DOMContentLoaded', updatePhoneAndWhatsApp);
+      var observer = new MutationObserver(function() {
+        updatePhoneAndWhatsApp();
+      });
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+    })();
+  </script>
 </body>
 </html>
